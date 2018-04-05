@@ -1,0 +1,296 @@
+---
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+- name: bosh-deployment
+  type: docker-image
+  source:
+    repository: cloudfoundry/bosh-deployment-resource
+
+- name: cg-common
+  type: docker-image
+  source:
+    repository: 18fgsa/cg-common-resource
+
+- name: s3-iam
+  type: docker-image
+  source:
+    repository: 18fgsa/s3-resource
+
+resources:
+- name: postfix-config
+  type: git
+  source:
+    uri: ((postfix-config-uri))
+    branch: ((postfix-config-branch))
+
+- name: postfix-release
+  type: s3-iam
+  source:
+    bucket: ((s3-bosh-releases-bucket))
+    private: true
+    regexp: postfix-(.*).tgz
+    region_name: ((aws-region))
+
+- name: stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+
+- name: terraform-yaml
+  type: s3-iam
+  source:
+    bucket: ((tf-state-bucket))
+    versioned_file: ((tf-state-file))
+    region_name: ((aws-region))
+
+- name: common-staging
+  type: cg-common
+  source:
+    bucket_name: ((private-staging-bucket))
+    secrets_file: staging-postfix.yml
+    secrets_passphrase: ((private-staging-passphrase))
+    bosh_cert: bosh.pem
+    region: ((aws-region))
+
+- name: common-production
+  type: cg-common
+  source:
+    bucket_name: ((private-production-bucket))
+    secrets_file: production-postfix.yml
+    secrets_passphrase: ((private-production-passphrase))
+    bosh_cert: bosh.pem
+    region: ((aws-region))
+
+- name: postfix-deployment-staging
+  type: bosh-deployment
+  source:
+    target: ((staging-bosh-target))
+    client: ((staging-bosh-client))
+    client_secret: ((staging-bosh-client-secret))
+    ca_cert: ((bosh-ca-cert))
+    deployment: postfix-staging
+
+- name: postfix-deployment-production
+  type: bosh-deployment
+  source:
+    target: ((production-bosh-target))
+    client: ((production-bosh-client))
+    client_secret: ((production-bosh-client-secret))
+    ca_cert: ((bosh-ca-cert))
+    deployment: postfix-production
+
+- name: slack
+  type: slack-notification
+  source:
+    url: ((slack-webhook-url))
+
+- name: tests-timer
+  type: time
+  source:
+    interval: 10m
+
+jobs:
+- name: deploy-postfix-staging
+  plan:
+  - aggregate:
+    - get: postfix-config
+      trigger: true
+    - get: postfix-release
+      trigger: true
+    - get: stemcell
+      trigger: true
+    - get: terraform-yaml
+    - get: common
+      resource: common-staging
+      trigger: true
+  - task: terraform-secrets
+    file: postfix-config/ci/terraform-secrets.yml
+    params:
+      ENVIRONMENT: staging
+  - put: postfix-deployment-staging
+    params:
+      manifest: postfix-config/deployment.yml
+      stemcells:
+      - stemcell/*.tgz
+      releases:
+      - postfix-release/*.tgz
+      ops_files:
+      - postfix-config/opsfiles/staging.yml
+      vars_files:
+      - terraform-yaml/state.yml
+      - terraform-secrets/terraform.yml
+      - common/secrets.yml
+  - task: smoke-test-sasl
+    file: postfix-config/ci/verify-sasl.yml
+    params:
+      ENVIRONMENT: staging
+  - task: smoke-test-dkim
+    file: postfix-config/ci/verify-dkim.yml
+    params:
+      ENVIRONMENT: staging
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed postfix on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy dns on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
+- name: plan-postfix-production
+  plan:
+  - aggregate:
+    - get: postfix-config
+      passed: [deploy-postfix-staging]
+      trigger: true
+    - get: postfix-release
+      passed: [deploy-postfix-staging]
+      trigger: true
+    - get: stemcell
+      passed: [deploy-postfix-staging]
+      trigger: true
+    - get: terraform-yaml
+      passed: [deploy-postfix-staging]
+      trigger: true
+    - get: common
+      resource: common-production
+      trigger: true
+  - task: terraform-secrets
+    file: postfix-config/ci/terraform-secrets.yml
+    params:
+      ENVIRONMENT: production
+  - put: postfix-deployment-production
+    params:
+      manifest: postfix-config/deployment.yml
+      dry_run: true
+      no_redact: true
+      stemcells:
+      - stemcell/*.tgz
+      releases:
+      - postfix-release/*.tgz
+      ops_files:
+      - postfix-config/opsfiles/production.yml
+      vars_files:
+      - terraform-yaml/state.yml
+      - terraform-secrets/terraform.yml
+      - common/secrets.yml
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Postfix production plan is ready for review
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to plan production Postfix
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
+- name: deploy-postfix-production
+  plan:
+  - aggregate:
+    - get: postfix-config
+      passed: [plan-postfix-production]
+    - get: postfix-release
+      passed: [plan-postfix-production]
+    - get: stemcell
+      passed: [plan-postfix-production]
+    - get: terraform-yaml
+      passed: [plan-postfix-production]
+    - get: common
+      resource: common-production
+      passed: [plan-postfix-production]
+  - task: terraform-secrets
+    file: postfix-config/ci/terraform-secrets.yml
+    params:
+      ENVIRONMENT: production
+  - put: postfix-deployment-production
+    params:
+      manifest: postfix-config/deployment.yml
+      stemcells:
+      - stemcell/*.tgz
+      releases:
+      - postfix-release/*.tgz
+      ops_files:
+      - postfix-config/opsfiles/production.yml
+      vars_files:
+      - terraform-yaml/state.yml
+      - terraform-secrets/terraform.yml
+      - common/secrets.yml
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed postfix on prodution
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy dns on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
+- name: smoke-tests-production
+  plan:
+  - aggregate:
+    - get: postfix-config
+      passed: [deploy-postfix-production]
+      trigger: true
+    - get: terraform-yaml
+      passed: [deploy-postfix-production]
+      trigger: true
+    - get: tests-timer
+      trigger: true
+  - task: smoke-test-sasl
+    file: postfix-config/ci/verify-sasl.yml
+    params:
+      ENVIRONMENT: production
+  - task: smoke-test-dkim
+    file: postfix-config/ci/verify-dkim.yml
+    params:
+      DOMAIN: cloud.gov
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Smoke Tests for Postfix on prod PASSED
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-news-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: Smoke Tests for Postfix on prod FAILED
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
