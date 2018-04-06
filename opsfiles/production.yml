@@ -1,0 +1,22 @@
+- type: replace
+  path: /name
+  value: postfix-production
+
+- type: replace
+  path: /stemcells/alias=default/name
+  value: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+
+- type: replace
+  path: /instance_groups/name=smtp_private/vm_type
+  value: smtp-small
+
+- type: replace
+  path: /instance_groups/name=smtp_private/azs
+  value: [z1]
+
+- type: replace
+  path: /instance_groups/name=smtp_private/networks
+  value:
+  - name: smtp-private
+    static_ips: ((terraform_outputs.production_smtp_private_ip))
+
