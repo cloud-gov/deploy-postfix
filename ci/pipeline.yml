@@ -47,15 +47,6 @@ resources:
     versioned_file: ((tf-state-file))
     region_name: ((aws-region))
 
-- name: common-staging
-  type: cg-common
-  source:
-    bucket_name: ((private-staging-bucket))
-    secrets_file: staging-postfix.yml
-    secrets_passphrase: ((private-staging-passphrase))
-    bosh_cert: bosh.pem
-    region: ((aws-region))
-
 - name: common-production
   type: cg-common
   source:
@@ -64,15 +55,6 @@ resources:
     secrets_passphrase: ((private-production-passphrase))
     bosh_cert: bosh.pem
     region: ((aws-region))
-
-- name: postfix-deployment-staging
-  type: bosh-deployment
-  source:
-    target: ((staging-bosh-target))
-    client: ((staging-bosh-client))
-    client_secret: ((staging-bosh-client-secret))
-    ca_cert: ((bosh-ca-cert))
-    deployment: postfix-staging
 
 - name: postfix-deployment-production
   type: bosh-deployment
@@ -94,78 +76,9 @@ resources:
     interval: 10m
 
 jobs:
-- name: deploy-postfix-staging
-  plan:
-  - aggregate:
-    - get: postfix-config
-      trigger: true
-    - get: postfix-release
-      trigger: true
-    - get: stemcell
-      trigger: true
-    - get: terraform-yaml
-    - get: common
-      resource: common-staging
-      trigger: true
-  - task: terraform-secrets
-    file: postfix-config/ci/terraform-secrets.yml
-    params:
-      ENVIRONMENT: staging
-  - put: postfix-deployment-staging
-    params:
-      manifest: postfix-config/deployment.yml
-      stemcells:
-      - stemcell/*.tgz
-      releases:
-      - postfix-release/*.tgz
-      ops_files:
-      - postfix-config/opsfiles/staging.yml
-      vars_files:
-      - terraform-yaml/state.yml
-      - terraform-secrets/terraform.yml
-      - common/secrets.yml
-  - task: smoke-test-sasl
-    file: postfix-config/ci/verify-sasl.yml
-    params:
-      ENVIRONMENT: staging
-  - task: smoke-test-dkim
-    file: postfix-config/ci/verify-dkim.yml
-    params:
-      ENVIRONMENT: staging
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed postfix on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to deploy dns on staging
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
 - name: plan-postfix-production
   plan:
   - aggregate:
-    - get: postfix-config
-      passed: [deploy-postfix-staging]
-      trigger: true
-    - get: postfix-release
-      passed: [deploy-postfix-staging]
-      trigger: true
-    - get: stemcell
-      passed: [deploy-postfix-staging]
-      trigger: true
-    - get: terraform-yaml
-      passed: [deploy-postfix-staging]
-      trigger: true
     - get: common
       resource: common-production
       trigger: true
