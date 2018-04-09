@@ -192,10 +192,6 @@ jobs:
     file: postfix-config/ci/verify-sasl.yml
     params:
       ENVIRONMENT: production
-  - task: smoke-test-dkim
-    file: postfix-config/ci/verify-dkim.yml
-    params:
-      DOMAIN: cloud.gov
   on_success:
     put: slack
     params:
