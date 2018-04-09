@@ -79,6 +79,13 @@ jobs:
 - name: plan-postfix-production
   plan:
   - aggregate:
+    - get: stemcell
+      trigger: true
+    - get: postfix-config
+      trigger: true
+    - get: postfix-release
+      trigger: true
+    - get: terraform-yaml
     - get: common
       resource: common-production
       trigger: true
