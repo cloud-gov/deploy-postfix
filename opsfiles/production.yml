@@ -7,15 +7,15 @@
   value: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 - type: replace
-  path: /instance_groups/name=smtp_private/vm_type?
+  path: /instance_groups/name=postfix/vm_type?
   value: smtp-small
 
 - type: replace
-  path: /instance_groups/name=smtp_private/azs
+  path: /instance_groups/name=postfix/azs
   value: [z1]
 
 - type: replace
-  path: /instance_groups/name=smtp_private/networks
+  path: /instance_groups/name=postfix/networks
   value:
   - name: smtp-private
     static_ips: ((terraform_outputs.production_smtp_private_ip))
