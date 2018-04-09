@@ -29,4 +29,14 @@ instance_groups:
   - release: postfix
     name: postfix
     properties:
-
+      postfix:
+        relayhost: ((postfix_relayhost))
+        root_recipient: ((postfix_root_recipient))
+        mynetworks: ((postfix_mynetworks))
+        myhostname: ((postfix_myhostname))
+        use_tls: ((postfix_use_tls))
+        tls_cert: ((postfix_tls_cert))
+        tls_key: ((postfix_tls_key))
+        sasl_users: ((postfix_sasl_users))
+        dkim_privatekey: ((postfix_dkim_privatekey))
+        dkim_maildomain: ((postfix_dkim_maildomain))
