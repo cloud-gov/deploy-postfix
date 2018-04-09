@@ -7,7 +7,7 @@
   value: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 - type: replace
-  path: /instance_groups/name=smtp_private/vm_type
+  path: /instance_groups/name=smtp_private/vm_type?
   value: smtp-small
 
 - type: replace
