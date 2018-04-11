@@ -93,7 +93,7 @@ jobs:
     params:
       manifest: postfix-config/deployment.yml
       dry_run: true
-      no_redact: true
+      no_redact: false
       stemcells:
       - stemcell/*.tgz
       releases:
