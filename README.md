@@ -15,5 +15,6 @@ Copy the secrets.example.yml file to production-postfix.yml and fill in the valu
 
 The pipeline under `ci/pipeline.yml` deploys to production.
 
-To customize this release for a deployment, [BOSH Operations Files](https://bosh.io/docs/cli-ops-files.html) are used to change the YAML to match the deployment.  These files replace variables given via [Bosh Variables](https://bosh.io/docs/cli-int.html) and `terraform-secrets.sh`.  To change the example record to the record of your choice:
+To customize this release for a deployment, [BOSH Operations Files](https://bosh.io/docs/cli-ops-files.html) are used to change the YAML to match the deployment.  These files replace variables given via [Bosh Variables](https://bosh.io/docs/cli-int.html) and `terraform-secrets.sh`.
 
+By default, this will deploy to bosh-lite.
