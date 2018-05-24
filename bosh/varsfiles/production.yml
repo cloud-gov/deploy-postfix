@@ -1,0 +1,6 @@
+postfix_root_recipient: cloud-gov-operations@gsa.gov
+postfix_mynetworks:
+  - 10.0.0.0/8
+postfix_myhostname: smtp.fr.cloud.gov
+postfix_use_tls: true
+postfix_dkim_maildomain: cloud.gov

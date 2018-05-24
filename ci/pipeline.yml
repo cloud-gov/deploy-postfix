@@ -98,10 +98,11 @@ jobs:
       releases:
       - postfix-release/*.tgz
       ops_files:
-      - postfix-config/opsfiles/production.yml
+      - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
       - common/secrets.yml
+      - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
     params:
