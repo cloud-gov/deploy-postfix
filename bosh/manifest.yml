@@ -35,9 +35,22 @@ instance_groups:
         mynetworks: ((postfix_mynetworks))
         myhostname: ((postfix_myhostname))
         use_tls: ((postfix_use_tls))
-        tls_cert: ((postfix_tls_cert))
-        tls_key: ((postfix_tls_key))
+        tls_cert: ((postfix_ssl.certificate))
+        tls_key: ((postfix_ssl.private_key))
         use_sasl: ((postfix_use_sasl))
         sasl_users: ((postfix_sasl_users))
         dkim_privatekey: ((postfix_dkim_privatekey))
         dkim_maildomain: ((postfix_dkim_maildomain))
+
+variables:
+- name: postfix_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: postfix_ca
+- name: postfix_ssl
+  type: certificate
+  options:
+    ca: postfix_ca
+    common_name: ((terraform_outputs.production_smtp_private_ip))
+    alternative_names: [ ((terraform_outputs.production_smtp_private_ip)), "smtp.fr.cloud.gov" ]
