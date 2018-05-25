@@ -15,9 +15,20 @@ This pipeline will deploy:
     * Mail will be relayed to the configured mail relay.
 
 ### Deployment
-Copy the bosh/secrets.example.yml file to production-postfix.yml and fill in the values with how you want it configured.  Then encrypt it and upload it to s3.
+## cloud.gov
+
+Create production-postfix.yml:
+```
+bosh int bosh/manifest.yml -l bosh/varsfiles/production.yml --vars-store /tmp/pfvars.yml > /tmp/production-postfix.yml
+```
+Append the bosh/secrets.example.yml file to production-postfix.yml and fill in the values with how you want it configured.  Then encrypt that file and upload it to s3.
 
 The pipeline under `ci/pipeline.yml` deploys to production.
 
-To customize this release for a deployment, [BOSH Operations Files](https://bosh.io/docs/cli-ops-files.html) are used to change the YAML to match the deployment.  These files replace variables given via [Bosh Variables](https://bosh.io/docs/cli-int.html) and `terraform-secrets.sh`.
+## bosh-lite
 
+To test the deployment out, you should be able to do this:
+```
+bosh int bosh/manifest.yml -l bosh/varsfiles/bosh-lite.yml --vars-store /tmp/pfvars.yml > /tmp/pfmanifest.yml
+bosh deploy -d postfix /tmp/pfmanifest.yml -l bosh/varsfiles/bosh-lite.yml -l /tmp/pfvars.yml
+```
