@@ -89,15 +89,10 @@ jobs:
     - get: common
       resource: common-production
       trigger: true
-  - task: terraform-secrets
-    file: postfix-config/ci/terraform-secrets.yml
-    params:
-      ENVIRONMENT: production
   - put: postfix-deployment-production
     params:
       manifest: postfix-config/deployment.yml
       dry_run: true
-      no_redact: true
       stemcells:
       - stemcell/*.tgz
       releases:
@@ -106,7 +101,6 @@ jobs:
       - postfix-config/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - terraform-secrets/terraform.yml
       - common/secrets.yml
   on_success:
     put: slack
@@ -141,10 +135,6 @@ jobs:
     - get: common
       resource: common-production
       passed: [plan-postfix-production]
-  - task: terraform-secrets
-    file: postfix-config/ci/terraform-secrets.yml
-    params:
-      ENVIRONMENT: production
   - put: postfix-deployment-production
     params:
       manifest: postfix-config/deployment.yml
@@ -156,7 +146,6 @@ jobs:
       - postfix-config/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - terraform-secrets/terraform.yml
       - common/secrets.yml
   on_success:
     put: slack
