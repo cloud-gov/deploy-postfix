@@ -1,0 +1,21 @@
+postfix-config-branch: master
+postfix-config-uri: https://github.com/18F/cg-deploy-postfix
+
+# slack-webhook-url: XXX
+slack-username: concourse
+slack-channel: '#cg-platform'
+slack-news-channel: '#cg-platform-news'
+slack-icon-url: https://avatars1.githubusercontent.com/u/7809479?v=3&s=40
+
+s3-bosh-releases-bucket: cloud-gov-bosh-releases
+aws-region: us-gov-west-1
+private-production-bucket: cloud-gov-varz
+# private-production-passphrase: XXX
+
+# bosh-ca-cert: XXX
+# production-bosh-client: XXX
+# production-bosh-client-secret: XXX
+# production-bosh-target: XXX
+
+tf-state-bucket: terraform-state
+tf-state-file: tooling/state.yml
