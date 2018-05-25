@@ -20,3 +20,10 @@
   - name: smtp-private
     static_ips: ((terraform_outputs.production_smtp_private_ip))
 
+- type: replace
+  path: /variables/name=postfix_ssl/options/common_name
+  value: ((terraform_outputs.production_smtp_private_ip))
+
+- type: replace
+  path: /variables/name=postfix_ssl/options/alternative_names
+  value: [ ((terraform_outputs.production_smtp_private_ip)), "smtp.fr.cloud.gov" ]

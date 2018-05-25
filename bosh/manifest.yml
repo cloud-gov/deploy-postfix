@@ -52,5 +52,5 @@ variables:
   type: certificate
   options:
     ca: postfix_ca
-    common_name: ((terraform_outputs.production_smtp_private_ip))
-    alternative_names: [ ((terraform_outputs.production_smtp_private_ip)), "smtp.fr.cloud.gov" ]
+    common_name: 10.244.8.64
+    alternative_names: [ 10.244.8.64, "smtp.fr.cloud.gov" ]
