@@ -19,9 +19,10 @@ This pipeline will deploy:
 
 Create production-postfix.yml:
 ```
-bosh int bosh/manifest.yml -l bosh/varsfiles/production.yml --vars-store /tmp/pfvars.yml > /tmp/production-postfix.yml
+cp bosh/secrets.example.yml /tmp/production-postfix.yml
+bosh int bosh/manifest.yml --vars-store /tmp/production-postfix.yml > /dev/null
 ```
-Append the bosh/secrets.example.yml file to production-postfix.yml and fill in the values with how you want it configured.  Then encrypt that file and upload it to s3.
+Replace all `XXX`es in `/tmp/production-postfix.yml` with proper values.  Then encrypt that file and upload it to s3.
 
 The pipeline under `ci/pipeline.yml` deploys to production.
 
@@ -29,6 +30,6 @@ The pipeline under `ci/pipeline.yml` deploys to production.
 
 To test the deployment out, you should be able to do this:
 ```
-bosh int bosh/manifest.yml -l bosh/varsfiles/bosh-lite.yml --vars-store /tmp/pfvars.yml > /tmp/pfmanifest.yml
+bosh int bosh/manifest.yml --vars-store /tmp/pfvars.yml > /tmp/pfmanifest.yml
 bosh deploy -d postfix /tmp/pfmanifest.yml -l bosh/varsfiles/bosh-lite.yml -l /tmp/pfvars.yml
 ```
