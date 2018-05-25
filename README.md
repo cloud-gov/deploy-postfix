@@ -34,3 +34,4 @@ bosh int bosh/manifest.yml --vars-store /tmp/pfvars.yml > /tmp/pfmanifest.yml
 bosh update-cloud-config bosh-lite-cloud-config.yml
 bosh deploy -d postfix /tmp/pfmanifest.yml -l bosh/varsfiles/bosh-lite.yml -l /tmp/pfvars.yml
 ```
+This assumes that the https://github.com/18F/postfix-boshrelease release has been created and uploaded already.  If you do not have that, then you will probably need to clone that repo, cd into it, and then `bosh create-release ; bosh upload-release` to get it there.
