@@ -138,16 +138,17 @@ jobs:
       passed: [plan-postfix-production]
   - put: postfix-deployment-production
     params:
-      manifest: postfix-config/deployment.yml
+      manifest: postfix-config/bosh/manifest.yml
       stemcells:
       - stemcell/*.tgz
       releases:
       - postfix-release/*.tgz
       ops_files:
-      - postfix-config/opsfiles/production.yml
+      - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
       - common/secrets.yml
+      - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
     params:
