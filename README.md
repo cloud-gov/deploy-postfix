@@ -15,18 +15,22 @@ This pipeline will deploy:
     * Mail will be relayed to the configured mail relay.
 
 ### Deployment
-## cloud.gov
+#### cloud.gov
 
-Create production-postfix.yml:
-```
-cp bosh/secrets.example.yml /tmp/production-postfix.yml
-bosh int bosh/manifest.yml --vars-store /tmp/production-postfix.yml > /dev/null
-```
-Replace all `XXX`es in `/tmp/production-postfix.yml` with proper values.  Then encrypt that file and upload it to s3.
+1. Create production-postfix.yml:
+   ```
+   cp bosh/secrets.example.yml /tmp/production-postfix.yml
+   bosh int bosh/manifest.yml --vars-store /tmp/production-postfix.yml > /dev/null
+   ```
+   Replace all `XXX`es in `/tmp/production-postfix.yml` with proper values.  Then encrypt that file and upload it to s3.
+1. Create cg-deploy-postfix.yml:
+   copy ci/concourse-defaults.yml to cg-deploy-postfix.yml, edit the file and uncomment all the lines with `XXX`es in them, fill in proper values.  Be sure to upload the file to the concourse secrets bucket so that others can use it.
+1. The pipeline under `ci/pipeline.yml` deploys to production:
+   ```
+   fly -t cloud-gov-govcloud sp -p deploy-postfix -c ci/pipeline.yml -l /tmp/cg-deploy-postfix.yml
+   ```
 
-The pipeline under `ci/pipeline.yml` deploys to production.
-
-## bosh-lite
+#### bosh-lite
 
 To test the deployment out, you should be able to do this:
 ```
