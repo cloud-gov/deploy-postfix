@@ -31,5 +31,6 @@ The pipeline under `ci/pipeline.yml` deploys to production.
 To test the deployment out, you should be able to do this:
 ```
 bosh int bosh/manifest.yml --vars-store /tmp/pfvars.yml > /tmp/pfmanifest.yml
+bosh update-cloud-config bosh-lite-cloud-config.yml
 bosh deploy -d postfix /tmp/pfmanifest.yml -l bosh/varsfiles/bosh-lite.yml -l /tmp/pfvars.yml
 ```
