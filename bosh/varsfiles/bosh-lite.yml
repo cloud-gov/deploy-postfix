@@ -1,0 +1,29 @@
+postfix_root_recipient: /dev/null
+postfix_mynetworks:
+  - 10.0.0.0/8
+postfix_myhostname: smtp.fr.cloud.gov
+postfix_use_tls: true
+postfix_dkim_maildomain: cloud.gov
+postfix_use_sasl: true
+postfix_sasl_users:
+  cloudgov: testpw
+# This key is just one I randomly generated.  It is not real.
+postfix_dkim_privatekey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  MIICXgIBAAKBgQDHs8bPPMTD88G8NzjnFuvcPKwVHXmKU5Ef+ffOoCUQ9KrfLbgX
+  SgGulk9NmxFcvbzKKZDNw5wxNFL1yI431v1a75IrXH1GIVfnasW9rk37Y5hEDSGH
+  fF57Vcvg8qMvtOSOrNJHSzEQKT3lD0NxlPtSy5/yiVjAHiBU/9YA72jHhQIDAQAB
+  AoGAdS6QolpOO411STQ+N5vDmuAfOeSpxPl0Vwce2igul9x5x6vUMhZDFmcs8aTk
+  cz8C4L2zMoptxJGnfIHKsgl9cCyvzuCWs9M8F5ycSdJVfXs7VZQF5K7dLNTbz3PU
+  tjIK4ryrO7yUPftqXaB4MUnl9ITQoeY6fNuwW2mq+GMQEgECQQD0M7lqz8Zdxujx
+  v1mycGFHp/YdmidEee24BTu0AdNDYPJnP5wDQMILiuYrax+5leBEWH8NcPxYdF1B
+  PcxLcaOVAkEA0VmufjxNKHyGYGUW7pwLpTnznkpyWMrb/sAQ+7amXt4PXDhYQbU6
+  QQFhjcxg97u7asDGrUwhkUllwdqaDWiYMQJBANHcla7uSloS8+O1fx8zJtbOyFqe
+  PLrDUgDANpO2sdkIuqjyaF//SgNjZfTQRd5Wp/n0V5O0kphtwCquMiBv05UCQQDE
+  dgLYmEJYYjPAtl1E4s/S6IWE4JxaU1UMxrWpYojSslV716yLTUUzx9YCue+tzFFf
+  JzXLX4yIyXZi64ByYNuhAkEAxBjnWRpNu6VoK2oBdXRvvvaqUWmpM8yM3XGD2JFn
+  T73gY+9z4kkbMOQj8UCLiearPbtm1IE6fCQsQrhN9t/aDg==
+  -----END RSA PRIVATE KEY-----
+postfix_dkim_publickey: |
+  mail._domainkey	IN	TXT	( "v=DKIM1; k=rsa; " "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHs8bPPMTD88G8NzjnFuvcPKwVHXmKU5Ef+ffOoCUQ9KrfLbgXSgGulk9NmxFcvbzKKZDNw5wxNFL1yI431v1a75IrXH1GIVfnasW9rk37Y5hEDSGHfF57Vcvg8qMvtOSOrNJHSzEQKT3lD0NxlPtSy5/yiVjAHiBU/9YA72jHhQIDAQAB" )  ; ----- DKIM key mail for cloud.gov
+postfix_relayhost: smtp-relay.gmail.com

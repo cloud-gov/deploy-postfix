@@ -91,17 +91,18 @@ jobs:
       trigger: true
   - put: postfix-deployment-production
     params:
-      manifest: postfix-config/deployment.yml
+      manifest: postfix-config/bosh/manifest.yml
       dry_run: true
       stemcells:
       - stemcell/*.tgz
       releases:
       - postfix-release/*.tgz
       ops_files:
-      - postfix-config/opsfiles/production.yml
+      - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
       - common/secrets.yml
+      - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
     params:
@@ -137,16 +138,17 @@ jobs:
       passed: [plan-postfix-production]
   - put: postfix-deployment-production
     params:
-      manifest: postfix-config/deployment.yml
+      manifest: postfix-config/bosh/manifest.yml
       stemcells:
       - stemcell/*.tgz
       releases:
       - postfix-release/*.tgz
       ops_files:
-      - postfix-config/opsfiles/production.yml
+      - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
       - common/secrets.yml
+      - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
     params:
@@ -160,7 +162,7 @@ jobs:
     put: slack
     params:
       text: |
-        :x: FAILED to deploy dns on production
+        :x: FAILED to deploy postfix on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
       channel: ((slack-channel))
       username: ((slack-username))
