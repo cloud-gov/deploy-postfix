@@ -27,3 +27,9 @@
 - type: replace
   path: /variables/name=postfix_ssl/options/alternative_names
   value: [ ((terraform_outputs.production_smtp_private_ip)), "smtp.fr.cloud.gov" ]
+
+- type: replace
+  path: /instance_groups/name=postfix/jobs/release=postfix/properties/postfix/sasl_users
+  value:
+    postfix_sasl_users:
+      cloudgov: ((cloudgov_pw))
