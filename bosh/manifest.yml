@@ -52,6 +52,6 @@ variables:
   options:
     ca: postfix_ca
     common_name: 10.244.8.64
-    alternative_names: [ 10.244.8.64, "smtp.fr.cloud.gov" ]
+    alternative_names: [ 10.244.8.64 ]
 - name: cloudgov_pw
   type: password

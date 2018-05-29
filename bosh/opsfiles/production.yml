@@ -28,7 +28,6 @@
   path: /variables/name=postfix_ssl/options/alternative_names
   value:
   - ((terraform_outputs.production_smtp_private_ip))
-  - smtp.fr.cloud.gov  # This name doesn't exist but might one day; ask @timothy-spencer
 
 - type: replace
   path: /instance_groups/name=postfix/jobs/release=postfix/properties/postfix/sasl_users?/cloudgov
