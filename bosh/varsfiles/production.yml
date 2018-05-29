@@ -1,7 +1,7 @@
 postfix_root_recipient: /dev/null
 postfix_mynetworks:
   - 10.0.0.0/8
-postfix_myhostname: smtp.fr.cloud.gov
+postfix_myhostname: smtp.fr.cloud.gov.localhost
 postfix_use_tls: true
 postfix_dkim_maildomain: cloud.gov
 postfix_use_sasl: true
