@@ -38,7 +38,6 @@ instance_groups:
         tls_cert: ((postfix_ssl.certificate))
         tls_key: ((postfix_ssl.private_key))
         use_sasl: ((postfix_use_sasl))
-        sasl_users: ((postfix_sasl_users))
         dkim_privatekey: ((postfix_dkim_privatekey))
         dkim_maildomain: ((postfix_dkim_maildomain))
 

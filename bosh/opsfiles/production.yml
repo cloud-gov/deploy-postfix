@@ -31,5 +31,5 @@
   - smtp.fr.cloud.gov  # This name doesn't exist but might one day; ask @timothy-spencer
 
 - type: replace
-  path: /instance_groups/name=postfix/jobs/release=postfix/properties/postfix/sasl_users/cloudgov?
+  path: /instance_groups/name=postfix/jobs/release=postfix/properties/postfix/sasl_users?/cloudgov
   value: ((cloudgov_pw))
