@@ -47,7 +47,7 @@ resources:
   source:
     region_name: ((aws-region))
     bucket: ((private-production-bucket))
-    versioned_file: production-postfix-decrypted.yml
+    versioned_file: production-postfix.yml
 
 - name: postfix-deployment-production
   type: bosh-deployment
@@ -93,7 +93,7 @@ jobs:
       - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common-production/production-postfix-decrypted.yml
+      - common-production/production-postfix.yml
       - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
@@ -138,7 +138,7 @@ jobs:
       - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common-production/production-postfix-decrypted.yml
+      - common-production/production-postfix.yml
       - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
