@@ -10,11 +10,6 @@ resource_types:
   source:
     repository: cloudfoundry/bosh-deployment-resource
 
-- name: cg-common
-  type: docker-image
-  source:
-    repository: 18fgsa/cg-common-resource
-
 - name: s3-iam
   type: docker-image
   source:
@@ -48,13 +43,11 @@ resources:
     region_name: ((aws-region))
 
 - name: common-production
-  type: cg-common
+  type: s3-iam
   source:
-    bucket_name: ((private-production-bucket))
-    secrets_file: production-postfix.yml
-    secrets_passphrase: ((private-production-passphrase))
-    bosh_cert: bosh.pem
-    region: ((aws-region))
+    region_name: ((aws-region))
+    bucket: ((private-production-bucket))
+    versioned_file: production-postfix-decrypted.yml
 
 - name: postfix-deployment-production
   type: bosh-deployment
@@ -86,8 +79,7 @@ jobs:
     - get: postfix-release
       trigger: true
     - get: terraform-yaml
-    - get: common
-      resource: common-production
+    - get: common-production
       trigger: true
   - put: postfix-deployment-production
     params:
@@ -101,7 +93,7 @@ jobs:
       - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common/secrets.yml
+      - common-production/secrets.yml
       - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
@@ -133,8 +125,7 @@ jobs:
       passed: [plan-postfix-production]
     - get: terraform-yaml
       passed: [plan-postfix-production]
-    - get: common
-      resource: common-production
+    - get: common-production
       passed: [plan-postfix-production]
   - put: postfix-deployment-production
     params:
@@ -147,7 +138,7 @@ jobs:
       - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common/secrets.yml
+      - common-production/secrets.yml
       - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
