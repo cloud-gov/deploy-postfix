@@ -93,7 +93,7 @@ jobs:
       - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common-production/secrets.yml
+      - common-production/production-postfix-decrypted.yml
       - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
@@ -138,7 +138,7 @@ jobs:
       - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common-production/secrets.yml
+      - common-production/production-postfix-decrypted.yml
       - postfix-config/bosh/varsfiles/production.yml
   on_success:
     put: slack
