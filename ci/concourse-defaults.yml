@@ -10,7 +10,6 @@ slack-icon-url: https://avatars1.githubusercontent.com/u/7809479?v=3&s=40
 s3-bosh-releases-bucket: cloud-gov-bosh-releases
 aws-region: us-gov-west-1
 private-production-bucket: cloud-gov-varz
-# private-production-passphrase: XXX
 
 # bosh-ca-cert: XXX
 # production-bosh-client: XXX
