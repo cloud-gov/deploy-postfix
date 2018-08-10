@@ -3,10 +3,6 @@
   value: postfix-production
 
 - type: replace
-  path: /stemcells/alias=default/name
-  value: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-
-- type: replace
   path: /instance_groups/name=postfix/vm_type?
   value: smtp-small
 
