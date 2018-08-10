@@ -70,6 +70,7 @@ resources:
 
 jobs:
 - name: plan-postfix-production
+  serial_groups: [deploy]
   plan:
   - aggregate:
     - get: stemcell
@@ -115,6 +116,7 @@ jobs:
       icon_url: ((slack-icon-url))
 
 - name: deploy-postfix-production
+  serial_groups: [deploy]
   plan:
   - aggregate:
     - get: postfix-config
@@ -160,6 +162,7 @@ jobs:
       icon_url: ((slack-icon-url))
 
 - name: smoke-tests-production
+  serial_groups: [deploy]
   plan:
   - aggregate:
     - get: postfix-config
