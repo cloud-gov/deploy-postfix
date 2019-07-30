@@ -72,7 +72,7 @@ jobs:
 - name: plan-postfix-production
   serial_groups: [deploy]
   plan:
-  - aggregate:
+  - in_parallel:
     - get: stemcell-xenial
       trigger: true
     - get: postfix-config
@@ -118,7 +118,7 @@ jobs:
 - name: deploy-postfix-production
   serial_groups: [deploy]
   plan:
-  - aggregate:
+  - in_parallel:
     - get: postfix-config
       passed: [plan-postfix-production]
     - get: postfix-release
@@ -164,7 +164,7 @@ jobs:
 - name: smoke-tests-production
   serial_groups: [deploy]
   plan:
-  - aggregate:
+  - in_parallel:
     - get: postfix-config
       passed: [deploy-postfix-production]
       trigger: true
