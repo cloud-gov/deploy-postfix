@@ -4,7 +4,7 @@
 
 - type: replace
   path: /instance_groups/name=postfix/vm_type?
-  value: smtp-small
+  value: t3.medium
 
 - type: replace
   path: /instance_groups/name=postfix/azs
