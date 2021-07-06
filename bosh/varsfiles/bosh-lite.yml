@@ -7,6 +7,7 @@ postfix_dkim_maildomain: cloud.gov
 postfix_use_sasl: true
 postfix_sasl_users:
   cloudgov: testpw
+  pages: testpw
 # This key is just one I randomly generated.  It is not real.
 postfix_dkim_privatekey: |
   -----BEGIN RSA PRIVATE KEY-----

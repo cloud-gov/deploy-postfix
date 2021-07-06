@@ -173,12 +173,18 @@ jobs:
       trigger: true
     - get: tests-timer
       trigger: true
-  - task: smoke-test-sasl
+  - task: smoke-test-cloudgov-sasl
     file: postfix-config/ci/verify-sasl.yml
     params:
       ENVIRONMENT: production
       USERNAME: cloudgov@fr.cloud.gov
       PASSWORD: ((cloudgov_pw))
+  - task: smoke-test-pages-sasl
+    file: postfix-config/ci/verify-sasl.yml
+    params:
+      ENVIRONMENT: production
+      USERNAME: pages@fr.cloud.gov
+      PASSWORD: ((pages_pw))
   on_success:
     put: slack
     params:
