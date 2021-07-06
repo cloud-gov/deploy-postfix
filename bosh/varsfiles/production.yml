@@ -5,5 +5,6 @@ postfix_myhostname: smtp.fr.cloud.gov
 postfix_use_tls: true
 postfix_dkim_maildomain: cloud.gov
 postfix_use_sasl: true
-postfix_sasl_users: 
+postfix_sasl_users:
   cloudgov: ((cloudgov_pw))
+  pages: ((pages_pw))

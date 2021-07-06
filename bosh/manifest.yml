@@ -55,3 +55,5 @@ variables:
     alternative_names: [ 10.244.8.64 ]
 - name: cloudgov_pw
   type: password
+- name: pages_pw
+  type: password
