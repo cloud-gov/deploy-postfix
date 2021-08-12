@@ -22,6 +22,7 @@ instance_groups:
   vm_type: default
   instances: 1
   azs: [z1, z2]
+  persistent_disk_type: 5GB
   networks:
   - name: manual
     static_ips: [10.244.8.64]
