@@ -30,10 +30,10 @@ resources:
     regexp: postfix-(.*).tgz
     region_name: ((aws-region))
 
-- name: stemcell-xenial
+- name: stemcell-bionic
   type: bosh-io-stemcell
   source:
-    name: bosh-aws-xen-hvm-ubuntu-xenial-go_agent
+    name: bosh-aws-xen-hvm-ubuntu-bionic-go_agent
 
 - name: terraform-yaml
   type: s3-iam
@@ -73,7 +73,7 @@ jobs:
   serial_groups: [deploy]
   plan:
   - in_parallel:
-    - get: stemcell-xenial
+    - get: stemcell-bionic
       trigger: true
     - get: postfix-config
       trigger: true
@@ -87,7 +87,7 @@ jobs:
       manifest: postfix-config/bosh/manifest.yml
       dry_run: true
       stemcells:
-      - stemcell-xenial/*.tgz
+      - stemcell-bionic/*.tgz
       releases:
       - postfix-release/*.tgz
       ops_files:
@@ -123,7 +123,7 @@ jobs:
       passed: [plan-postfix-production]
     - get: postfix-release
       passed: [plan-postfix-production]
-    - get: stemcell-xenial
+    - get: stemcell-bionic
       passed: [plan-postfix-production]
     - get: terraform-yaml
       passed: [plan-postfix-production]
@@ -133,7 +133,7 @@ jobs:
     params:
       manifest: postfix-config/bosh/manifest.yml
       stemcells:
-      - stemcell-xenial/*.tgz
+      - stemcell-bionic/*.tgz
       releases:
       - postfix-release/*.tgz
       ops_files:
