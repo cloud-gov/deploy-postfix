@@ -1,0 +1,31 @@
+- type: replace
+  path: /name
+  value: postfix-prod-west
+
+- type: replace
+  path: /instance_groups/name=postfix/vm_type?
+  value: t3.medium
+
+- type: replace
+  path: /instance_groups/name=postfix/azs
+  value: [z1]
+
+- type: replace
+  path: /instance_groups/name=postfix/networks
+  value:
+  - name: smtp-private
+    static_ips: ((terraform_outputs.production_west_smtp_private_ip))
+
+- type: replace
+  path: /variables/name=postfix_ssl/options/common_name
+  value: ((terraform_outputs.production_west_smtp_private_ip))
+
+- type: replace
+  path: /variables/name=postfix_ssl/options/alternative_names
+  value:
+  - ((terraform_outputs.production_west_smtp_private_ip))
+
+- type: replace
+  path: /instance_groups/name=postfix/jobs/release=postfix/properties/postfix/sasl_users?/cloudgov
+  value: ((cloudgov_pw))
+
