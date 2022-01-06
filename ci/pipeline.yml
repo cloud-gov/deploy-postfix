@@ -216,7 +216,6 @@ jobs:
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
-
 - name: smoke-tests-production
   serial_groups: [deploy]
   plan:
@@ -260,7 +259,7 @@ jobs:
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
-name: smoke-tests-prod-west
+- name: smoke-tests-prod-west
   serial_groups: [deploy]
   plan:
   - in_parallel:
