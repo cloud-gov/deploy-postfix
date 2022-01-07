@@ -42,6 +42,20 @@ resources:
     versioned_file: ((tf-state-file))
     region_name: ((aws-region))
 
+- name: terraform-west-yaml
+  type: s3-iam
+  source:
+    bucket: ((tf-state-bucket))
+    versioned_file: ((tf-state-west-file))
+    region_name: ((aws-region))
+
+- name: terraform-east-yaml
+  type: s3-iam
+  source:
+    bucket: ((tf-state-bucket))
+    versioned_file: ((tf-state-east-file))
+    region_name: ((aws-region))
+
 - name: common-production
   type: s3-iam
   source:
@@ -66,6 +80,15 @@ resources:
     client_secret: ((production-bosh-client-secret))
     ca_cert: ((bosh-ca-cert))
     deployment: postfix-prod-west
+
+- name: postfix-deployment-prod-east
+  type: bosh-deployment
+  source:
+    target: ((production-bosh-target))
+    client: ((production-bosh-client))
+    client_secret: ((production-bosh-client-secret))
+    ca_cert: ((bosh-ca-cert))
+    deployment: postfix-prod-east
 
 - name: slack
   type: slack-notification
@@ -170,52 +193,6 @@ jobs:
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
-- name: deploy-postfix-prod-west
-  serial_groups: [deploy]
-  plan:
-  - in_parallel:
-    - get: postfix-config
-      passed: [plan-postfix-production]
-    - get: postfix-release
-      passed: [plan-postfix-production]
-    - get: stemcell-bionic
-      passed: [plan-postfix-production]
-    - get: terraform-yaml
-      passed: [plan-postfix-production]
-    - get: common-production
-      passed: [plan-postfix-production]
-  - put: postfix-deployment-prod-west
-    params:
-      manifest: postfix-config/bosh/manifest.yml
-      stemcells:
-      - stemcell-bionic/*.tgz
-      releases:
-      - postfix-release/*.tgz
-      ops_files:
-      - postfix-config/bosh/opsfiles/prod-west.yml
-      vars_files:
-      - terraform-yaml/state.yml
-      - common-production/production-postfix.yml
-      - postfix-config/bosh/varsfiles/prod-west.yml
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed postfix on prod-west
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-  on_failure:
-    put: slack
-    params:
-      text: |
-        :x: FAILED to deploy postfix on prod-west
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
-
 - name: smoke-tests-production
   serial_groups: [deploy]
   plan:
@@ -231,7 +208,7 @@ jobs:
   - task: smoke-test-cloudgov-sasl
     file: postfix-config/ci/verify-sasl.yml
     params:
-      ENVIRONMENT: production
+      STATEFILE: terraform-yaml
       USERNAME: cloudgov@fr.cloud.gov
       PASSWORD: ((cloudgov_pw))
   - task: smoke-test-pages-sasl
@@ -259,22 +236,114 @@ jobs:
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
+- name: plan-postfix-prod-west
+  serial_groups: [deploy]
+  plan:
+  - in_parallel:
+    - get: stemcell-bionic
+      trigger: true
+    - get: postfix-config
+      trigger: true
+    - get: postfix-release
+      trigger: true
+    - get: terraform-west-yaml
+    - get: common-production
+      trigger: true
+  - put: postfix-deployment-prod-west
+    params:
+      manifest: postfix-config/bosh/manifest.yml
+      dry_run: true
+      stemcells:
+      - stemcell-bionic/*.tgz
+      releases:
+      - postfix-release/*.tgz
+      ops_files:
+      - postfix-config/bosh/opsfiles/prod-west.yml
+      vars_files:
+      - terraform-west-yaml/state.yml
+      - common-production/production-postfix.yml
+      - postfix-config/bosh/varsfiles/prod-west.yml
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Postfix prod-west plan is ready for review
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to plan prod-west Postfix
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
+- name: deploy-postfix-prod-west
+  serial_groups: [deploy]
+  plan:
+  - in_parallel:
+    - get: postfix-config
+      passed: [plan-postfix-prod-west]
+    - get: postfix-release
+      passed: [plan-postfix-prod-west]
+    - get: stemcell-bionic
+      passed: [plan-postfix-prod-west]
+    - get: terraform-west-yaml
+      passed: [plan-postfix-prod-west]
+    - get: common-production
+      passed: [plan-postfix-prod-west]
+  - put: postfix-deployment-prod-west
+    params:
+      manifest: postfix-config/bosh/manifest.yml
+      stemcells:
+      - stemcell-bionic/*.tgz
+      releases:
+      - postfix-release/*.tgz
+      ops_files:
+      - postfix-config/bosh/opsfiles/prod-west.yml
+      vars_files:
+      - terraform-west-yaml/state.yml
+      - common-production/production-postfix.yml
+      - postfix-config/bosh/varsfiles/prod-west.yml
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed postfix on prod-west
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy postfix on prod-west
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
 - name: smoke-tests-prod-west
   serial_groups: [deploy]
   plan:
   - in_parallel:
     - get: postfix-config
-      passed: [deploy-postfix-production]
+      passed: [deploy-postfix-prod-west]
       trigger: true
-    - get: terraform-yaml
-      passed: [deploy-postfix-production]
+    - get: terraform-west-yaml
+      passed: [deploy-postfix-prod-west]
       trigger: true
     - get: tests-timer
       trigger: true
   - task: smoke-test-cloudgov-sasl
     file: postfix-config/ci/verify-sasl.yml
     params:
-      ENVIRONMENT: production_west
+      STATEFILE: terraform-west-yaml
       USERNAME: cloudgov@fr.cloud.gov
       PASSWORD: ((cloudgov_pw))
   on_success:
@@ -295,3 +364,132 @@ jobs:
       channel: ((slack-channel))
       username: ((slack-username))
       icon_url: ((slack-icon-url))
+
+# - name: plan-postfix-prod-east
+#   serial_groups: [deploy]
+#   plan:
+#   - in_parallel:
+#     - get: stemcell-bionic
+#       trigger: true
+#     - get: postfix-config
+#       trigger: true
+#     - get: postfix-release
+#       trigger: true
+#     - get: terraform-east-yaml
+#     - get: common-production
+#       trigger: true
+#   - put: postfix-deployment-prod-east
+#     params:
+#       manifest: postfix-config/bosh/manifest.yml
+#       dry_run: true
+#       stemcells:
+#       - stemcell-bionic/*.tgz
+#       releases:
+#       - postfix-release/*.tgz
+#       ops_files:
+#       - postfix-config/bosh/opsfiles/prod-east.yml
+#       vars_files:
+#       - terraform-east-yaml/state.yml
+#       - common-production/production-postfix.yml
+#       - postfix-config/bosh/varsfiles/prod-east.yml
+#   on_success:
+#     put: slack
+#     params:
+#       text: |
+#         :white_check_mark: Postfix prod-east plan is ready for review
+#         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+#       channel: ((slack-channel))
+#       username: ((slack-username))
+#       icon_url: ((slack-icon-url))
+#   on_failure:
+#     put: slack
+#     params:
+#       text: |
+#         :x: FAILED to plan prod-east Postfix
+#         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+#       channel: ((slack-channel))
+#       username: ((slack-username))
+#       icon_url: ((slack-icon-url))
+
+# - name: deploy-postfix-prod-east
+#   serial_groups: [deploy]
+#   plan:
+#   - in_parallel:
+#     - get: postfix-config
+#       passed: [plan-postfix-prod-east]
+#     - get: postfix-release
+#       passed: [plan-postfix-prod-east]
+#     - get: stemcell-bionic
+#       passed: [plan-postfix-prod-east]
+#     - get: terraform-east-yaml
+#       passed: [plan-postfix-prod-east]
+#     - get: common-production
+#       passed: [plan-postfix-prod-east]
+#   - put: postfix-deployment-prod-east
+#     params:
+#       manifest: postfix-config/bosh/manifest.yml
+#       stemcells:
+#       - stemcell-bionic/*.tgz
+#       releases:
+#       - postfix-release/*.tgz
+#       ops_files:
+#       - postfix-config/bosh/opsfiles/prod-east.yml
+#       vars_files:
+#       - terraform-east-yaml/state.yml
+#       - common-production/production-postfix.yml
+#       - postfix-config/bosh/varsfiles/prod-east.yml
+#   on_success:
+#     put: slack
+#     params:
+#       text: |
+#         :white_check_mark: Successfully deployed postfix on prod-east
+#         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+#       channel: ((slack-channel))
+#       username: ((slack-username))
+#       icon_url: ((slack-icon-url))
+#   on_failure:
+#     put: slack
+#     params:
+#       text: |
+#         :x: FAILED to deploy postfix on prod-east
+#         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+#       channel: ((slack-channel))
+#       username: ((slack-username))
+#       icon_url: ((slack-icon-url))
+
+# - name: smoke-tests-prod-east
+#   serial_groups: [deploy]
+#   plan:
+#   - in_parallel:
+#     - get: postfix-config
+#       passed: [deploy-postfix-prod-east]
+#       trigger: true
+#     - get: terraform-east-yaml
+#       passed: [deploy-postfix-prod-east]
+#       trigger: true
+#     - get: tests-timer
+#       trigger: true
+#   - task: smoke-test-cloudgov-sasl
+#     file: postfix-config/ci/verify-sasl.yml
+#     params:
+#       STATEFILE: terraform-east-yaml
+#       USERNAME: cloudgov@fr.cloud.gov
+#       PASSWORD: ((cloudgov_pw))
+#   on_success:
+#     put: slack
+#     params:
+#       text: |
+#         :white_check_mark: Smoke Tests for Postfix on prod-east PASSED
+#         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+#       channel: ((slack-news-channel))
+#       username: ((slack-username))
+#       icon_url: ((slack-icon-url))
+#   on_failure:
+#     put: slack
+#     params:
+#       text: |
+#         :x: Smoke Tests for Postfix on prod-east FAILED
+#         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+#       channel: ((slack-channel))
+#       username: ((slack-username))
+#       icon_url: ((slack-icon-url))
