@@ -2,7 +2,7 @@
 
 set -eux
 
-SMTP_IP=$(spruce json terraform-yaml/state.yml | jq -r ".terraform_outputs.${ENVIRONMENT}_smtp_private_ip")
+SMTP_IP=$(spruce json ${STATEFILE}/state.yml | jq -r ".terraform_outputs.production_smtp_private_ip")
 
 BASE64_USERNAME=$(echo -n "${USERNAME}" | base64)
 BASE64_PASSWORD=$(echo -n "${PASSWORD}" | base64)
