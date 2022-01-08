@@ -75,18 +75,18 @@ resources:
 - name: postfix-deployment-prod-west
   type: bosh-deployment
   source:
-    target: ((production-bosh-target))
-    client: ((production-bosh-client))
-    client_secret: ((production-bosh-client-secret))
+    target: ((tooling-west-bosh-target))
+    client: ((tooling-west-bosh-client))
+    client_secret: ((tooling-west-bosh-client-secret))
     ca_cert: ((bosh-ca-cert))
     deployment: postfix-prod-west
 
 - name: postfix-deployment-prod-east
   type: bosh-deployment
   source:
-    target: ((production-bosh-target))
-    client: ((production-bosh-client))
-    client_secret: ((production-bosh-client-secret))
+    target: ((tooling-east-bosh-target))
+    client: ((tooling-east-bosh-client))
+    client_secret: ((tooling-east-bosh-client-secret))
     ca_cert: ((bosh-ca-cert))
     deployment: postfix-prod-east
 
@@ -258,10 +258,10 @@ jobs:
       - postfix-release/*.tgz
       ops_files:
       - postfix-config/bosh/opsfiles/prod-west.yml
+      - postfix-config/bosh/opsfiles/production.yml
       vars_files:
       - terraform-yaml/state.yml
       - common-production/production-postfix.yml
-      - postfix-config/bosh/varsfiles/production.yml
       - postfix-config/bosh/varsfiles/prod-west.yml
   on_success:
     put: slack
@@ -371,7 +371,7 @@ jobs:
 #     - get: common-production
 #       trigger: true
 #   - put: postfix-deployment-prod-east
-#     params:
+#     params: &prod-east-deploy
 #       manifest: postfix-config/bosh/manifest.yml
 #       dry_run: true
 #       stemcells:
@@ -419,17 +419,8 @@ jobs:
 #       passed: [plan-postfix-prod-east]
 #   - put: postfix-deployment-prod-east
 #     params:
-#       manifest: postfix-config/bosh/manifest.yml
-#       stemcells:
-#       - stemcell-bionic/*.tgz
-#       releases:
-#       - postfix-release/*.tgz
-#       ops_files:
-#       - postfix-config/bosh/opsfiles/prod-east.yml
-#       vars_files:
-#       - terraform-east-yaml/state.yml
-#       - common-production/production-postfix.yml
-#       - postfix-config/bosh/varsfiles/prod-east.yml
+#       <<: *prod-east-deploy
+#       dry_run: false
 #   on_success:
 #     put: slack
 #     params:
