@@ -208,13 +208,11 @@ jobs:
   - task: smoke-test-cloudgov-sasl
     file: postfix-config/ci/verify-sasl.yml
     params:
-      STATEFILE: terraform-yaml
       USERNAME: cloudgov@fr.cloud.gov
       PASSWORD: ((cloudgov_pw))
   - task: smoke-test-pages-sasl
     file: postfix-config/ci/verify-sasl.yml
     params:
-      ENVIRONMENT: production
       USERNAME: pages@fr.cloud.gov
       PASSWORD: ((pages_pw))
   on_success:
@@ -246,11 +244,12 @@ jobs:
       trigger: true
     - get: postfix-release
       trigger: true
-    - get: terraform-west-yaml
+    - get: terraform-yaml
+      resource: terraform-west-yaml
     - get: common-production
       trigger: true
   - put: postfix-deployment-prod-west
-    params:
+    params: &postfix-west-deploy
       manifest: postfix-config/bosh/manifest.yml
       dry_run: true
       stemcells:
@@ -260,8 +259,9 @@ jobs:
       ops_files:
       - postfix-config/bosh/opsfiles/prod-west.yml
       vars_files:
-      - terraform-west-yaml/state.yml
+      - terraform-yaml/state.yml
       - common-production/production-postfix.yml
+      - postfix-config/bosh/varsfiles/production.yml
       - postfix-config/bosh/varsfiles/prod-west.yml
   on_success:
     put: slack
@@ -292,23 +292,15 @@ jobs:
       passed: [plan-postfix-prod-west]
     - get: stemcell-bionic
       passed: [plan-postfix-prod-west]
-    - get: terraform-west-yaml
+    - get: terraform-yaml
+      resource: terraform-west-yaml
       passed: [plan-postfix-prod-west]
     - get: common-production
       passed: [plan-postfix-prod-west]
   - put: postfix-deployment-prod-west
     params:
-      manifest: postfix-config/bosh/manifest.yml
-      stemcells:
-      - stemcell-bionic/*.tgz
-      releases:
-      - postfix-release/*.tgz
-      ops_files:
-      - postfix-config/bosh/opsfiles/prod-west.yml
-      vars_files:
-      - terraform-west-yaml/state.yml
-      - common-production/production-postfix.yml
-      - postfix-config/bosh/varsfiles/prod-west.yml
+      <<: *postfix-west-deploy
+      dry_run: false
   on_success:
     put: slack
     params:
@@ -335,7 +327,8 @@ jobs:
     - get: postfix-config
       passed: [deploy-postfix-prod-west]
       trigger: true
-    - get: terraform-west-yaml
+    - get: terraform-yaml
+      resource: terraform-west-yaml
       passed: [deploy-postfix-prod-west]
       trigger: true
     - get: tests-timer
@@ -343,7 +336,6 @@ jobs:
   - task: smoke-test-cloudgov-sasl
     file: postfix-config/ci/verify-sasl.yml
     params:
-      STATEFILE: terraform-west-yaml
       USERNAME: cloudgov@fr.cloud.gov
       PASSWORD: ((cloudgov_pw))
   on_success:
@@ -464,7 +456,8 @@ jobs:
 #     - get: postfix-config
 #       passed: [deploy-postfix-prod-east]
 #       trigger: true
-#     - get: terraform-east-yaml
+#     - get: terraform-yaml
+#       resource: terraform-east-yaml
 #       passed: [deploy-postfix-prod-east]
 #       trigger: true
 #     - get: tests-timer
@@ -472,7 +465,6 @@ jobs:
 #   - task: smoke-test-cloudgov-sasl
 #     file: postfix-config/ci/verify-sasl.yml
 #     params:
-#       STATEFILE: terraform-east-yaml
 #       USERNAME: cloudgov@fr.cloud.gov
 #       PASSWORD: ((cloudgov_pw))
 #   on_success:
