@@ -54,7 +54,7 @@ resources:
   source:
     bucket: ((tf-state-bucket))
     versioned_file: ((tf-state-east-file))
-    region_name: ((aws-east-region))
+    region_name: ((aws-region))
 
 - name: common-production
   type: s3-iam
@@ -73,7 +73,7 @@ resources:
 - name: common-production-east
   type: s3-iam
   source:
-    region_name: ((aws-east-region))
+    region_name: ((aws-region))
     bucket: ((private-production-bucket))
     versioned_file: production-east-postfix.yml
 
@@ -271,8 +271,8 @@ jobs:
       releases:
       - postfix-release/*.tgz
       ops_files:
-      - postfix-config/bosh/opsfiles/prod-west.yml
       - postfix-config/bosh/opsfiles/production.yml
+      - postfix-config/bosh/opsfiles/prod-west.yml
       vars_files:
       - terraform-yaml/state.yml
       - common-production-west/production-west-postfix.yml
@@ -394,8 +394,8 @@ jobs:
       releases:
       - postfix-release/*.tgz
       ops_files:
-      - postfix-config/bosh/opsfiles/prod-east.yml
       - postfix-config/bosh/opsfiles/production.yml
+      - postfix-config/bosh/opsfiles/prod-east.yml
       vars_files:
       - terraform-yaml/state.yml
       - common-production-east/production-east-postfix.yml
