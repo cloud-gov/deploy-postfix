@@ -1,0 +1,9 @@
+- type: replace
+  path: /name
+  value: postfix-prod-east
+
+- type: remove
+  path: /variables/name=postfix_ca
+- type: replace
+  path: /variables/name=postfix_ssl/options/ca
+  value: /master-bosh-ca
