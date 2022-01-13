@@ -275,8 +275,8 @@ jobs:
       - postfix-config/bosh/opsfiles/prod-west.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common-production-west/production-west-postfix.yml
       - postfix-config/bosh/varsfiles/production.yml
+      - common-production-west/production-west-postfix.yml
   on_success:
     put: slack
     params:
@@ -398,8 +398,8 @@ jobs:
       - postfix-config/bosh/opsfiles/prod-east.yml
       vars_files:
       - terraform-yaml/state.yml
-      - common-production-east/production-east-postfix.yml
       - postfix-config/bosh/varsfiles/production.yml
+      - common-production-east/production-east-postfix.yml
   on_success:
     put: slack
     params:
