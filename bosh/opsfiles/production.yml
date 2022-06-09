@@ -32,3 +32,7 @@
 - type: replace
   path: /instance_groups/name=postfix/jobs/release=postfix/properties/postfix/sasl_users?/pages
   value: ((pages_pw))
+
+- type: replace
+  path: /instance_groups/name=postfix/jobs/release=postfix/properties/postfix/sasl_users?/cloudgovbilling
+  value: ((cloudgovbilling))
