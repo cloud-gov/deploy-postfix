@@ -8,3 +8,4 @@ postfix_use_sasl: true
 postfix_sasl_users:
   cloudgov: ((cloudgov_pw))
   pages: ((pages_pw))
+  cloudgov-billing: ((cloudgovbilling_pw))
