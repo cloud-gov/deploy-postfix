@@ -181,7 +181,7 @@ jobs:
   - task: smoke-test-pages-sasl
     file: postfix-config/ci/verify-sasl.yml
     params:
-      USERNAME: cloudgovbilling@fr.cloud.gov
+      USERNAME: pages@fr.cloud.gov
       PASSWORD: ((pages_pw))
   - task: smoke-test-pages-sasl
     file: postfix-config/ci/verify-sasl.yml
