@@ -19,6 +19,7 @@ resources:
 - name: postfix-config
   type: git
   source:
+    commit_verification_keys: ((cloud-gov-pgp-keys))
     uri: ((postfix-config-uri))
     branch: ((postfix-config-branch))
 
@@ -102,7 +103,7 @@ jobs:
       text: |
         :white_check_mark: Postfix production plan is ready for review
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: '#cg-platform'
       username: ((slack-username))
       icon_url: ((slack-icon-url))
   on_failure:
@@ -111,7 +112,7 @@ jobs:
       text: |
         :x: FAILED to plan production Postfix
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: '#cg-platform'
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
@@ -148,7 +149,7 @@ jobs:
       text: |
         :white_check_mark: Successfully deployed postfix on prodution
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: '#cg-platform-news'
       username: ((slack-username))
       icon_url: ((slack-icon-url))
   on_failure:
@@ -157,7 +158,7 @@ jobs:
       text: |
         :x: FAILED to deploy postfix on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: '#cg-platform'
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
@@ -194,7 +195,7 @@ jobs:
       text: |
         :white_check_mark: Smoke Tests for Postfix on prod PASSED
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-news-channel))
+      channel: '#cg-platform-news'
       username: ((slack-username))
       icon_url: ((slack-icon-url))
   on_failure:
@@ -203,6 +204,6 @@ jobs:
       text: |
         :x: Smoke Tests for Postfix on prod FAILED
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: '#cg-platform'
       username: ((slack-username))
       icon_url: ((slack-icon-url))
