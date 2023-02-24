@@ -1,5 +1,5 @@
 postfix-config-branch: master
-postfix-config-uri: https://github.com/18F/cg-deploy-postfix
+postfix-config-uri: https://github.com/cloud-gov/cg-deploy-postfix
 
 # slack-webhook-url: XXX
 slack-username: concourse
