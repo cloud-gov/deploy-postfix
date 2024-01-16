@@ -2,7 +2,7 @@
 
 This repo contains the source for the Bosh deployment manifest and deployment pipeline for the cloud.gov Postfix deployment.
 
-## Rationale
+## Rationale 
 
 cloud.gov requires a mail relay to send outbound mails from internal tooling.
 
