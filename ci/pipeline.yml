@@ -154,15 +154,6 @@ jobs:
       - terraform-yaml/state.yml
       - common-production/production-postfix.yml
       - postfix-config/bosh/varsfiles/production.yml
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Postfix production plan is ready for review
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: '#cg-platform'
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
@@ -200,15 +191,6 @@ jobs:
       - terraform-yaml/state.yml
       - common-production/production-postfix.yml
       - postfix-config/bosh/varsfiles/production.yml
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed postfix on prodution
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: '#cg-platform-news'
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
@@ -250,15 +232,6 @@ jobs:
     params:
       USERNAME: cloudgovbilling@fr.cloud.gov
       PASSWORD: ((cloudgovbilling_pw))
-  on_success:
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Smoke Tests for Postfix on prod PASSED
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: '#cg-platform-news'
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
