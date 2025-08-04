@@ -156,11 +156,11 @@ jobs:
       - postfix-config/bosh/varsfiles/production.yml
   on_failure:
     put: slack
-    params:
+    params: &slack-failure-params
       text: |
         :x: FAILED to plan production Postfix
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: '#cg-platform'
+      channel: ((slack-channel-failure))
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
@@ -194,12 +194,10 @@ jobs:
   on_failure:
     put: slack
     params:
+      <<: *slack-failure-params
       text: |
         :x: FAILED to deploy postfix on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: '#cg-platform'
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
 
 - name: smoke-tests-production
   serial_groups: [deploy]
@@ -235,9 +233,7 @@ jobs:
   on_failure:
     put: slack
     params:
+      <<: *slack-failure-params
       text: |
         :x: Smoke Tests for Postfix on prod FAILED
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: '#cg-platform'
-      username: ((slack-username))
-      icon_url: ((slack-icon-url))
