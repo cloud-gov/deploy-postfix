@@ -68,7 +68,7 @@ resources:
   type: git
   source:
     commit_verification_keys: ((cloud-gov-pgp-keys))
-    uri: ((postfix-config-uri))
+    uri: https://github.com/cloud-gov/cg-deploy-postfix
     branch: ((postfix-config-branch))
 
 - name: postfix-release
@@ -127,6 +127,13 @@ resources:
     tag: latest
 
 jobs:
+- name: set-self
+  plan:
+    - get: postfix-config
+      trigger: true
+    - set_pipeline: self
+      file: postfix-config/ci/pipeline.yml
+
 - name: plan-postfix-production
   serial_groups: [deploy]
   plan:
@@ -135,6 +142,7 @@ jobs:
       trigger: true
     - get: postfix-config
       trigger: true
+      passed: [set-self]
     - get: postfix-release
       trigger: true
     - get: terraform-yaml
@@ -160,7 +168,7 @@ jobs:
       text: |
         :x: FAILED to plan production Postfix
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel-failure))
+      channel: ((slack-channel-platform))
       username: ((slack-username))
       icon_url: ((slack-icon-url))
 
