@@ -4,6 +4,8 @@ name: postfix
 releases:
 - name: postfix
   version: latest
+- name: bpm
+  version: latest
 
 update:
   canaries: 1
@@ -27,6 +29,8 @@ instance_groups:
   - name: manual
     static_ips: [10.244.8.64]
   jobs:
+  - release: bpm
+    name: bpm
   - release: postfix
     name: postfix
     properties:
