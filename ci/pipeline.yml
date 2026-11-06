@@ -101,10 +101,10 @@ resources:
 - name: postfix-deployment-production
   type: bosh-deployment
   source:
-    target: ((production-bosh-target))
-    client: ((production-bosh-client))
-    client_secret: ((production-bosh-client-secret))
-    ca_cert: ((bosh-ca-cert))
+    ca_cert: ((bosh-director-info.tooling.ca_cert))
+    client: ((bosh-director-info.tooling.client))
+    client_secret: ((bosh-director-info.tooling.client_secret))
+    target: ((bosh-director-info.tooling.environment))
     deployment: postfix-production
 
 - name: slack
